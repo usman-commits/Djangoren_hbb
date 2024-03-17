@@ -1,0 +1,44 @@
+body {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    background-repeat: repeat;
+}
+
+.bg-primary{
+    background-color: #b6a0da; 
+}
+
+.card-footer{
+    background: transparent;
+    border-top: 0px;
+}
+
+.navbar{
+    background-color: rgb(241, 6, 6);
+}
+
+.heading{
+    text-align: center;
+    margin-top: 20px;
+}
+
+.logo{
+    height: 200px;
+    width: 200px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 0px;
+}
+
+.dropdown-menu{
+    position:absolute;
+    background-color: rgb(255, 127, 127);
+    top:100%;
+    right:0;
+}
+
+.list-unstyled{
+    margin-bottom: 10px;
+    padding-bottom: 10%;
+}
