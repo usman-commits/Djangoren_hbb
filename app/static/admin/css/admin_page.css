@@ -1,0 +1,21 @@
+#header{
+    background-color: black;
+}
+
+#branding h1 a, #branding h2{
+    color: red;
+}
+
+#app_list .app-models{
+    color: green;
+}
+
+
+#breadcrumbs {
+    background-color: red;
+}
+
+#content-header .model-name{
+    background-color: red;
+}
+

@@ -1,0 +1,39 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+#content-related {
+    margin-bottom: 20px;
+}
+
+#content-related h2 {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+#content-related ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#content-related li {
+    margin-bottom: 5px;
+}
+
+#content-related a {
+    display: block;
+    padding: 5px;
+    background-color: #f0f0f0;
+    text-decoration: none;
+    color: #333;
+}
+</style>
+{% endblock %}
+
+{% block sidebar %}
+
+{{ block.super }}
+{% endblock %}

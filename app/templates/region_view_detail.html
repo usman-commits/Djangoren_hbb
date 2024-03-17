@@ -1,0 +1,29 @@
+<!-- region_view.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+  <div>
+    <ul class="nav nav-tabs" id="stateTabs">
+      {% for state in states %}
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="loadState('{{ state }}')">{{ state }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div id="stateContent"></div>
+
+  <script>
+    function loadState(state) {
+      $.ajax({
+        url: `/state/${state}/`,
+        type: 'GET',
+        success: function (data) {
+          $('#stateContent').html(data);
+        }
+      });
+    }
+  </script>
+{% endblock %}

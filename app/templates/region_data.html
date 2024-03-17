@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Region Data</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        .red-header th {
+            background-color: red !important;
+            color: white;
+        }
+
+        table.gridlines {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        table.gridlines th,
+        table.gridlines td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        table.gridlines th {
+            text-align: left;
+        }
+
+        table.gridlines tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        table.gridlines tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <h2>Region Data</h2>
+        <div id="table-data">
+            <!-- Table data will be populated dynamically -->
+        </div>
+    </div>
+
+    <!-- JavaScript code -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Function to populate table data for all states in a region
+            function populateTableData(region) {
+                $.ajax({
+                    url: '/generate_region_data/',
+                    data: {
+                        'region': region
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        var tableData = data.states;
+                        var tableHtml = '<table class="table gridlines"><thead><tr class="red-header"><th>SN</th><th class="sortable" data-column="HSE_name">HSE NAME</th><th class="sortable" data-column="State">STATE</th><th class="sortable" data-column="MIFI">MIFI</th><th class="sortable" data-column="Router">ROUTER</th><th class="sortable" data-column="ODU">ODU</th><th class="sortable" data-column="d5G_Router">5G ROUTER</th><th class="sortable" data-column="total">TOTAL</th><th>TARGET</th><th>ACHIEVED %</th><th class="sortable" data-column="lmtd">LMTD</th><th class="sortable" data-column="lmtd-growth">GROWTH %</th></tr></thead><tbody>';
+
+                        // Keep track of LMTD for each user
+                        var lmtdMap = {};
+
+                        tableData.forEach(function(item, index) {
+                            var achievedPercentage = (item.total / 50) * 100; // Calculate achieved percentage
+                            tableHtml += '<tr>';
+                            tableHtml += '<td>' + (index + 1) + '</td>';
+                            tableHtml += '<td>' + item.HSE_name + '</td>';
+                            tableHtml += '<td>' + item.State + '</td>';
+                            tableHtml += '<td>' + item.MIFI + '</td>';
+                            tableHtml += '<td>' + item.Router + '</td>';
+                            tableHtml += '<td>' + item.ODU + '</td>';
+                            tableHtml += '<td>' + item.d5G_Router + '</td>';
+                            tableHtml += '<td>' + item.total + '</td>';
+                            tableHtml += '<td>50</td>'; // Constant value for target
+                            tableHtml += '<td>' + achievedPercentage.toFixed() + '%</td>'; // Display achieved percentage with two decimal places
+
+                            // Calculate and update LMTD
+                            var lmtd = lmtdMap[item.HSE_name] || 0;
+                            lmtdMap[item.HSE_name] = lmtd + item.total; // Update LMTD
+                            tableHtml += '<td class="lmtd">' + lmtd + '</td>'; // Display LMTD
+
+                            // Calculate and update LMTD growth
+                            var growth = calculateLMTDGrowth(item.HSE_name, lmtdMap);
+                            tableHtml += '<td class="lmtd-growth">' + growth.toFixed() + '%</td>'; // Display LMTD growth
+
+                            // Add other fields here as needed
+                            tableHtml += '</tr>';
+                        });
+                        tableHtml += '</tbody></table>';
+                        $('#table-data').html(tableHtml);
+                    }
+                });
+            }
+
+            // Function to calculate LMTD growth for each user
+            function calculateLMTDGrowth(HSE_name, lmtdMap) {
+                // Implement as per your requirements
+                return 0; // Placeholder, replace with actual calculation
+            }
+
+            // Fetch region data when the page loads
+            var region = 'North East'; // Default region, change as needed
+            populateTableData(region);
+        });
+    </script>
+</body>
+</html>

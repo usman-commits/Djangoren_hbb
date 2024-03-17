@@ -1,0 +1,22 @@
+{
+  "name": "HBB Report Portal",
+  "short_name": "HBBRP",
+  "description": "App /report daily sales figure",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FF0000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/static/icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/static/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

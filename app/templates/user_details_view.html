@@ -1,0 +1,28 @@
+<!-- user_details_view.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}User Details View{% endblock %}</title>
+</head>
+<body>
+
+<h1>User Details</h1>
+
+{% with user=user_details %}
+    <p>Name: {{ user.name }}</p>
+    <p>State: {{ user.state }}</p>
+    <p>MIFI: {{ user.mifi }}</p>
+    <p>Router: {{ user.router }}</p>
+    <p>ODU: {{ user.ODU }}</p>
+    <p>5G Router: {{ user.d5g_router }}</p>
+    <p>Total: {{ user.total }}</p>
+    <p>Target: {{ user.target }}</p>
+    <p>Achieved: {{ user.achieved }}%</p>
+    <p>LMTD: {{ user.LMTD }}%</p>
+    <p>Growth: {{ user.growth }}%</p>
+{% endwith %}
+
+</body>
+</html>

@@ -1,0 +1,248 @@
+{% extends 'base.html' %}
+
+{% block title %}Device Registration{% endblock title %}
+
+{% block main-content %}
+  <div class="container">
+    <div class="row my-3">
+      <div class="col-sm-6 offset-sm-3">
+        <h3>Device Registration</h3>
+        <hr>
+
+        <form method="post" class="shadow p-5">
+          {% csrf_token %}
+
+          <!-- User -->
+          <div class="mb-3">
+            {{ form.user.label_tag }}
+            {{ form.user }}
+            <small class="text-danger">{{ form.user.errors|striptags }}</small>
+          </div>
+
+          <!-- Name -->
+          <div class="mb-3">
+            {{ form.HSE_name.label_tag }}
+            {{ form.HSE_name }}
+            <small class="text-danger">{{ form.HSE_name.errors|striptags }}</small>
+          </div>
+
+          <!-- Region -->
+          <div class="mb-3">
+            {{ form.Region.label_tag }}
+            {{ form.Region }}
+            <small class="text-danger">{{ form.Region.errors|striptags }}</small>
+          </div>
+
+          <!-- State -->
+          <div class="mb-3">
+            {{ form.State.label_tag }}
+            {{ form.State }}
+            <small class="text-danger">{{ form.State.errors|striptags }}</small>
+          </div>
+
+          <!-- Device Type -->
+          <div class="mb-3">
+            {{ form.Device_type.label_tag }}
+            {{ form.Device_type }}
+            <small class="text-danger">{{ form.Device_type.errors|striptags }}</small>
+          </div>
+
+          <!-- IMEI -->
+          <div class="mb-3">
+            {{ form.IMEI.label_tag }}
+            {{ form.IMEI }}
+          </div>
+
+          <!-- Error message div -->
+          <div id="errorMessage" class="alert alert-danger" style="display: none;"></div>
+
+          <script>
+            // Get the input element for IMEI number
+            const imeiInput = document.querySelector('#id_IMEI');
+
+            // Add event listener for input event
+            imeiInput.addEventListener('input', function () {
+                // Get the value of the IMEI number
+                const imeiValue = imeiInput.value;
+                
+                // Check if the length exceeds 15 characters
+                if (imeiValue.length > 15) {
+                    // Display an error message
+                    const errorMessageDiv = document.getElementById('errorMessage');
+                    errorMessageDiv.textContent = 'IMEI cannot be greater than 15 digits';
+                    errorMessageDiv.style.display = 'block';
+                    // Clear the input value (optional)
+                    imeiInput.value = imeiValue.slice(0, 15);
+                } else {
+                    // Hide the error message if the input is valid
+                    document.getElementById('errorMessage').style.display = 'none';
+                }
+            });
+          </script>
+
+          <!-- MSISDN -->
+          <div class="mb-3">
+            {{ form.MSISDN.label_tag }}
+            {{ form.MSISDN }}
+            <small class="text-danger">{{ form.MSISDN.errors|striptags }}</small>
+          </div>
+
+          <!-- Alternate Number -->
+          <div class="mb-3">
+            {{ form.Alternate.label_tag }}
+            {{ form.Alternate }}
+            <small class="text-danger">{{ form.Alternate.errors|striptags }}</small>
+          </div>
+
+          <div class="mb-3">
+            {{ form.Customer_name.label_tag }}
+            {{ form.Customer_name }}
+            <small class="text-danger">{{ form.Customer_name.errors|striptags }}</small>
+          </div>
+
+          <input type="submit" value="Submit" class="btn btn-primary">
+        </form>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+            var salesChart;  // Declare a variable to hold the Chart.js instance
+
+            function updateSalesChart(data) {
+                // Extract labels and data from the received JSON data
+                var labels = Object.keys(data.total_sales_per_region);
+                var values = Object.values(data.total_sales_per_region);
+
+                // If the chart has not been created yet, create it
+                if (!salesChart) {
+                    var ctx = document.getElementById('salesChart').getContext('2d');
+                    salesChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Total Sales per Region',
+                                data: values,
+                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                borderColor: 'rgba(75, 192, 192, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    // Update the existing chart with new data
+                    salesChart.data.labels = labels;
+                    salesChart.data.datasets[0].data = values;
+                    salesChart.update();
+                }
+            }
+
+            // Call the function to update the sales chart on page load
+            updateSalesChart({
+                "total_sales_per_region": {"North East": 0, "North West": 0, "South East": 0, "South South": 0}
+            });
+
+            // Optionally, you can set up a periodic update using setInterval
+            setInterval(function () {
+                $.ajax({
+                    url: '/sales-chart-data/',
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        updateSalesChart(data);
+                    },
+                    error: function (error) {
+                        console.error('Error updating sales chart data:', error);
+                    }
+                });
+            }, 60000);  // Update every 1 minute
+        </script>
+
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script>
+            function updateStates() {
+                var regionSelect = document.getElementById('id_Region');
+                var stateSelect = document.getElementById('id_State');
+                var region = regionSelect.value;
+        
+                var stateOptions = {
+                    'North East': [
+                        'Kano',
+                        'Jigawa',
+                        'Bauchi',
+                        'Yobe',
+                        'Borno',
+                        'Adamawa',
+                        'Taraba',
+                        'Gombe'
+                    ],
+                    'North West': [
+                        'Kaduna',
+                        'FCT',
+                        'Katsina',
+                        'Niger',
+                        'Plateau',
+                        'Kebbi',
+                        'Sokoto',
+                        'Zamfara',
+                        'Kogi',
+                        'Nasarawa'
+                    ],
+                    'South East': [
+                        'Enugu',
+                        'Imo',
+                        'Anambra',
+                        'Abia',
+                        'Benue',
+                        'Ebonyi'
+                    ],
+                    'South South': [
+                        'Bayelsa',
+                        'Delta',
+                        'Port Harcourt',
+                        'Akwa Ibom',
+                        'Cross River',
+                        'Edo'
+                    ],
+                    'Lagos': [
+                        'Lagos Boundary',
+                        'Lagos Island', 
+                        'Lagos Mainland'
+                    ],
+                    'South West': [
+                        'Lagos',
+                        'Ogun',
+                        'Ondo',
+                        'Osun',
+                        'Ekiti'
+                    ]
+                    // Add more states as needed
+                };
+        
+                // Clear existing options
+                stateSelect.innerHTML = '';
+        
+                // Populate state options based on the selected region
+                stateOptions[region].forEach(function (state) {
+                    var option = document.createElement('option');
+                    option.value = state; // Set both the value and display text to the state name
+                    option.text = state;
+                    stateSelect.appendChild(option);
+                });
+            }
+        
+            // Call the function when the page loads and whenever the region selection changes
+            window.onload = updateStates;
+            document.getElementById('id_Region').addEventListener('change', updateStates);
+        </script>
+      </div>
+    </div>
+  </div>
+{% endblock main-content %}

@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broadband Data</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Include jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+
+
+    <!-- Custom CSS -->
+    <style>
+        .red-header th {
+            background-color: red !important;
+            color: white;
+        }
+
+        table.gridlines {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        table.gridlines th,
+        table.gridlines td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        table.gridlines th {
+            text-align: left;
+        }
+
+        table.gridlines tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        table.gridlines tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4">
+                <h2>Select Region:</h2>
+                <div id="region-buttons">
+                    <!-- Region buttons will be populated dynamically -->
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h2>Select State:</h2>
+                <select id="state-dropdown" class="form-select">
+                    <!-- States dropdown will be populated dynamically -->
+                </select>
+            </div>
+        </div>
+        <div class="col-md-12 mt-3">
+            <h2 id="current-month-year"></h2> <!-- Display current month and year -->
+            <div>
+                <!-- Navigation buttons for switching between months -->
+                <button id="prevMonthBtn" class="btn btn-primary">Previous Month</button>
+                <button id="nextMonthBtn" class="btn btn-primary">Next Month</button>
+                <!-- Hidden input fields to store the current month, year, and day -->
+                <input type="hidden" id="current-month" value="1"> <!-- Assuming January is the initial month -->
+                <input type="hidden" id="current-year" value="2024"> <!-- Assuming the initial year -->
+                <input type="hidden" id="current-day" value="1"> <!-- Assuming the initial day -->
+                <!-- Navigation buttons for switching between days -->
+                <button id="exportToExcelBtn" class="btn btn-primary">Export to Excel</button>
+            </div>
+        </div>
+        <div class="col-md-12 mt-5">
+            <div id="table-data">
+                <!-- Table data will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript code -->
+    <script>
+        $(document).ready(function() {
+            // Function to populate region buttons
+            function populateRegionButtons() {
+                var regions = ['North East', 'North West', 'South East', 'South South', 'Lagos', 'West'];
+                var buttonsHtml = '';
+                regions.forEach(function(region) {
+                    buttonsHtml += '<button class="btn btn-primary region-button" data-region="' + region + '">' + region + '</button>';
+                });
+                $('#region-buttons').html(buttonsHtml);
+            }
+
+            // Function to populate states dropdown based on selected region
+            function populateStatesDropdown(region) {
+                $.ajax({
+                    url: '/get_states/',
+                    data: {
+                        'region': region
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        var states = data.states;
+                        var optionsHtml = '<option value="">Select State</option>';
+                        states.forEach(function(state) {
+                            optionsHtml += '<option value="' + state[0] + '">' + state[1] + '</option>';
+                        });
+                        $('#state-dropdown').html(optionsHtml);
+                    }
+                });
+            }
+
+            // Function to populate table data based on selected state, month, year, and day
+            function populateTableData(state, month, year, day) {
+                $.ajax({
+                    url: '/get_table_data/',
+                    data: {
+                        'state': state,
+                        'month': month,
+                        'year': year,
+                        'day': day
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        var tableData = data.table_data;
+                        var tableHtml = '<table class="table gridlines"><thead><tr class="red-header"><th>SN</th><th class="sortable" data-column="HSE_name">HSE Name</th><th class="sortable" data-column="State">STATE</th><th class="sortable" data-column="MIFI">MIFI</th><th class="sortable" data-column="Router">ROUTER</th><th class="sortable" data-column="ODU">ODU</th><th class="sortable" data-column="d5G_Router">5G ROUTER</th><th class="sortable" data-column="total">TOTAL</th><th>TARGET</th><th>ACHIEVED %</th><th class="sortable" data-column="lmtd">LMTD</th><th class="sortable" data-column="lmtd-growth">GROWTH %</th></tr></thead><tbody>';
+
+                        // Keep track of LMTD for each user
+                        var lmtdMap = {};
+                        var grandTotalMIFI = 0;
+                        var grandTotalRouter = 0;
+                        var grandTotalODU = 0;
+                        var grandTotal5GRouter = 0;
+                        var grandTotalAchieved = 0;
+                        var grandTotalTarget = 0;
+
+                        tableData.forEach(function(item, index) {
+                            var achievedPercentage = (item.total / 50) * 100; // Calculate achieved percentage
+                            grandTotalMIFI += parseInt(item.MIFI);
+                            grandTotalRouter += parseInt(item.Router);
+                            grandTotalODU += parseInt(item.ODU);
+                            grandTotal5GRouter += parseInt(item.d5G_Router);
+                            grandTotalAchieved += item.total;
+                            grandTotalTarget += 50;
+                            tableHtml += '<tr>';
+                            tableHtml += '<td>' + (index + 1) + '</td>';
+                            tableHtml += '<td>' + item.HSE_name + '</td>';
+                            tableHtml += '<td>' + item.State + '</td>';
+                            tableHtml += '<td>' + item.MIFI + '</td>';
+                            tableHtml += '<td>' + item.Router + '</td>';
+                            tableHtml += '<td>' + item.ODU + '</td>';
+                            tableHtml += '<td>' + item.d5G_Router + '</td>';
+                            tableHtml += '<td>' + item.total + '</td>';
+                            tableHtml += '<td>50</td>'; // Constant value for target
+                            tableHtml += '<td>' + achievedPercentage.toFixed() + '%</td>'; // Display achieved percentage with two decimal places
+
+                            // Calculate and update LMTD
+                            var lmtd = lmtdMap[item.HSE_name] || 0;
+                            lmtdMap[item.HSE_name] = lmtd + item.total; // Update LMTD
+                            tableHtml += '<td class="lmtd">' + lmtd + '</td>'; // Display LMTD
+
+                            // Calculate and update LMTD growth
+                            var growth = calculateLMTDGrowth(item.HSE_name, lmtdMap);
+                            tableHtml += '<td class="lmtd-growth">' + growth.toFixed() + '%</td>'; // Display LMTD growth
+
+                            // Add other fields here as needed
+                            tableHtml += '</tr>';
+                        });
+
+                        // Append grand totals row to the table
+                        tableHtml += '<tr>';
+                        tableHtml += '<td colspan="3">Grand Total</td>';
+                        tableHtml += '<td>' + grandTotalMIFI + '</td>';
+                        tableHtml += '<td>' + grandTotalRouter + '</td>';
+                        tableHtml += '<td>' + grandTotalODU + '</td>';
+                        tableHtml += '<td>' + grandTotal5GRouter + '</td>';
+                        tableHtml += '<td>' + grandTotalAchieved + '</td>';
+                        tableHtml += '<td>' + grandTotalTarget + '</td>';
+                        tableHtml += '<td>' + ((grandTotalAchieved / grandTotalTarget) * 100).toFixed() + '%</td>';
+                        tableHtml += '<td>-</td>'; // Placeholder for LMTD column
+                        tableHtml += '<td>-</td>'; // Placeholder for LMTD growth column
+                        tableHtml += '</tr>';
+
+                        tableHtml += '</tbody></table>';
+                        $('#table-data').html(tableHtml);
+                        $('#current-month-year').text(data.corresponding_date); // Update current month and year display
+                    }
+                });
+            }
+
+            // Event listener for region buttons
+            $(document).on('click', '.region-button', function() {
+                var region = $(this).data('region');
+                populateStatesDropdown(region);
+            });
+
+            // Event listener for state dropdown change
+            $('#state-dropdown').change(function() {
+                var state = $(this).val();
+                var month = $('#current-month').val(); // Get the current month from the hidden input field
+                var year = $('#current-year').val(); // Get the current year from the hidden input field
+                var day = $('#current-day').val(); // Get the current day from the hidden input field
+                populateTableData(state, month, year, day);
+            });
+
+            // Function to update table data for the next month
+            $('#nextMonthBtn').click(function() {
+                var state = $('#state-dropdown').val();
+                var currentMonth = $('#current-month').val(); // Get current month
+                var nextMonth = parseInt(currentMonth) + 1; // Calculate next month
+                var currentYear = parseInt($('#current-year').val()); // Get current year
+                if (nextMonth > 12) {
+                    nextMonth = 1; // Reset month to January
+                    currentYear += 1; // Increment year
+                }
+                $('#current-month').val(nextMonth); // Update hidden input field with the current month
+                $('#current-year').val(currentYear); // Update hidden input field with the current year
+                var day = $('#current-day').val(); // Get the current day from the hidden input field
+                populateTableData(state, nextMonth, currentYear, day);
+            });
+
+            // Function to update table data for the previous month
+            $('#prevMonthBtn').click(function() {
+                var state = $('#state-dropdown').val();
+                var currentMonth = $('#current-month').val(); // Get current month
+                var prevMonth = parseInt(currentMonth) - 1; // Calculate previous month
+                var currentYear = parseInt($('#current-year').val()); // Get current year
+                if (prevMonth < 1) {
+                    prevMonth = 12; // Set to December
+                    currentYear -= 1; // Decrement year
+                }
+                $('#current-month').val(prevMonth); // Update hidden input field with the current month
+                $('#current-year').val(currentYear); // Update hidden input field with the current year
+                var day = $('#current-day').val(); // Get the current day from the hidden input field
+                populateTableData(state, prevMonth, currentYear, day);
+            });
+
+            // Function to update the table data for the previous day
+            $('#prevDayBtn').click(function() {
+                var state = $('#state-dropdown').val();
+                var currentDay = $('#current-day').val();
+                var currentMonth = $('#current-month').val(); // Get current month
+                var currentYear = $('#current-year').val(); // Get current year
+
+                var previousDate = new Date(currentYear, currentMonth - 1, currentDay);
+                previousDate.setDate(previousDate.getDate() - 1);
+
+                $('#current-day').val(previousDate.getDate());
+                populateTableData(state, currentMonth, currentYear, previousDate.getDate());
+            });
+
+            // Function to update the table data for the next day
+            $('#nextDayBtn').click(function() {
+                var state = $('#state-dropdown').val();
+                var currentDay = $('#current-day').val();
+                var currentMonth = $('#current-month').val(); // Get current month
+                var currentYear = $('#current-year').val(); // Get current year
+
+                var nextDate = new Date(currentYear, currentMonth - 1, currentDay);
+                nextDate.setDate(nextDate.getDate() + 1);
+
+                $('#current-day').val(nextDate.getDate());
+                populateTableData(state, currentMonth, currentYear, nextDate.getDate());
+            });
+
+            // Function to calculate LMTD growth for each user
+            function calculateLMTDGrowth(HSE_name, lmtdMap) {
+                var currentDate = new Date(); // Get the current date
+                var currentMonth = currentDate.getMonth() + 1; // Get the current month (January is 0)
+                var currentYear = currentDate.getFullYear(); // Get the current year
+
+                // Check if LMGT data exists for the current month and year
+                if (lmtdMap[HSE_name] && lmtdMap[HSE_name][currentYear] && lmtdMap[HSE_name][currentYear][currentMonth]) {
+                    var lmtd = lmtdMap[HSE_name][currentYear][currentMonth];
+                    // Calculate growth compared to the previous month
+                    if (currentMonth === 1) {
+                        // If current month is January, compare to December of the previous year
+                        var prevMonth = 12;
+                        var prevYear = currentYear - 1;
+                        if (lmtdMap[HSE_name][prevYear] && lmtdMap[HSE_name][prevYear][prevMonth]) {
+                            var prevLMGT = lmtdMap[HSE_name][prevYear][prevMonth];
+                            if (prevLMGT !== 0) {
+                                return ((lmtd - prevLMGT) / prevLMGT) * 100;
+                            }
+                        }
+                    } else {
+                        // Compare to the previous month of the same year
+                        var prevMonth = currentMonth - 1;
+                        if (lmtdMap[HSE_name][currentYear][prevMonth]) {
+                            var prevLMGT = lmtdMap[HSE_name][currentYear][prevMonth];
+                            if (prevLMGT !== 0) {
+                                return ((lmtd - prevLMGT) / prevLMGT) * 100;
+                            }
+                        }
+                    }
+                }
+                return 0; // Return 0 if there's no LMGT data available
+            }
+
+            // Event listener for sorting table data
+            $(document).on('click', '.sortable', function() {
+                var column = $(this).data('column');
+                var table = $(this).closest('table');
+                var rows = table.find('tbody > tr').get();
+
+                rows.sort(function(a, b) {
+                    var A = $(a).find('td:eq(' + table.find('thead > tr th').index($(this)) + ')').text().toUpperCase();
+                    var B = $(b).find('td:eq(' + table.find('thead > tr th').index($(this)) + ')').text().toUpperCase();
+
+                    if ($.isNumeric(A) && $.isNumeric(B)) {
+                        return A - B;
+                    } else {
+                        return A.localeCompare(B);
+                    }
+                });
+
+                $.each(rows, function(index, row) {
+                    table.children('tbody').append(row);
+                });
+            });
+
+            // Populate region buttons on page load
+            populateRegionButtons();
+        });
+
+        // Function to export table data to Excel
+function exportToExcel() {
+    var table = document.getElementById('table-data');
+    var wb = XLSX.utils.table_to_book(table, {sheet:"Sheet1"});
+    XLSX.writeFile(wb, 'table_data.xlsx');
+}
+
+// Event listener for export button click
+$('#exportToExcelBtn').click(function() {
+    exportToExcel();
+});
+
+// Function to export table data to image
+function exportToImage() {
+            var table = document.getElementById('table-data');
+            html2canvas(table).then(function(canvas) {
+                var imgData = canvas.toDataURL('image/png');
+                var link = document.createElement('a');
+                link.href = imgData;
+                link.download = 'table_image.png';
+                link.click();
+            });
+        }
+
+        // Event listener for export button click
+        $(document).on('click', '#exportToImageBtn', function() {
+            exportToImage();
+        });
+
+    </script>
+    <div class="mb-3">
+        <a href="{% url 'home' %}" class="btn btn-primary">Back</a>
+      </div>
+</body>
+</html>

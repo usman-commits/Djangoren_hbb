@@ -1,0 +1,24 @@
+<!-- state_partial.html -->
+
+<ul class="nav nav-tabs" id="userTabs">
+    {% for user in users %}
+      <li class="nav-item">
+        <a class="nav-link" href="#" onclick="loadUserDetails('{{ user.id }}')">{{ user.name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+  
+  <div id="userDetailsContent"></div>
+  
+  <script>
+    function loadUserDetails(userId) {
+      $.ajax({
+        url: `/user/${userId}/`,
+        type: 'GET',
+        success: function (data) {
+          $('#userDetailsContent').html(data);
+        }
+      });
+    }
+  </script>
+  

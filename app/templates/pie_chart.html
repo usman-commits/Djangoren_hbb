@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Include Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Add style to adjust layout -->
+    <style>
+        
+
+
+        body {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        h1, canvas {
+            margin: 10px;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        .chart-container {
+            text-align: center;
+            flex-basis: 50%; /* Set to half of the available space */
+        }
+
+        .small-chart-container {
+            text-align: center;
+            flex-basis: 33.33%; /* Set to one-third of the available space */
+        }
+
+
+        .grand-total {
+        font-weight: bold;
+    }
+
+    body {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: center;
+    }
+
+    h1, canvas {
+        margin: 10px;
+    }
+
+    canvas {
+        display: block;
+    }
+
+    .chart-container {
+        text-align: center;
+        flex-basis: 50%; /* Set to half of the available space */
+    }
+
+    .small-chart-container {
+        text-align: center;
+        flex-basis: 33.33%; /* Set to one-third of the available space */
+    }
+    </style>
+</head>
+<body>
+
+<div class="chart-container">
+    <h1>Overall Region Sales Distribution</h1>
+    <canvas id="regionPieChart" width="400" height="400"></canvas>
+</div>
+
+<div class="chart-container">
+    <h1>Device Type Distribution</h1>
+    <canvas id="deviceTypePieChart" width="400" height="400"></canvas>
+</div>
+
+<div class="small-chart-container">
+    <h1>Device Count for North East Region</h1>
+    <canvas id="oneRegionDeviceCountChart" width="400" height="400"></canvas>
+</div>
+
+<div class="small-chart-container">
+    <h1>Device Count for North West Region</h1>
+    <canvas id="northWestRegionDeviceCountChart" width="400" height="400"></canvas>
+</div>
+
+<div class="small-chart-container">
+    <h1>Device Count for South East Region</h1>
+    <canvas id="southEastRegionDeviceCountChart" width="400" height="400"></canvas>
+</div>
+
+<div class="small-chart-container">
+    <h1>Device Count for South South Region</h1>
+    <canvas id="southSouthRegionDeviceCountChart" width="400" height="400"></canvas>
+</div>
+
+<div class="small-chart-container">
+    <h1>Device Count for Lagos Region</h1>
+    <canvas id="lagosRegionDeviceCountChart" width="400" height="400"></canvas>
+</div>
+
+<div class="small-chart-container">
+    <h1>Device Count for West Region</h1>
+    <canvas id="westRegionDeviceCountChart" width="400" height="400"></canvas>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Parse JSON strings as JavaScript arrays
+        var regionLabels = JSON.parse('{{ region_labels_json|escapejs }}');
+        var regionSizes = JSON.parse('{{ region_sizes_json|escapejs }}');
+        var deviceLabels = JSON.parse('{{ device_labels_json|escapejs }}');
+        var deviceSizes = JSON.parse('{{ device_sizes_json|escapejs }}');
+        var oneRegionDeviceCountLabels = JSON.parse('{{ one_region_device_count_labels_json|escapejs }}');
+        var oneRegionDeviceCountSizes = JSON.parse('{{ one_region_device_count_sizes_json|escapejs }}');
+        var northWestRegionDeviceCountLabels = JSON.parse('{{ north_west_region_device_count_labels_json|escapejs }}');
+        var northWestRegionDeviceCountSizes = JSON.parse('{{ north_west_region_device_count_sizes_json|escapejs }}');
+        var southEastRegionDeviceCountLabels = JSON.parse('{{ south_east_region_device_count_labels_json|escapejs }}');
+        var southEastRegionDeviceCountSizes = JSON.parse('{{ south_east_region_device_count_sizes_json|escapejs }}');
+        var southSouthRegionDeviceCountLabels = JSON.parse('{{ south_south_region_device_count_labels_json|escapejs }}');
+        var southSouthRegionDeviceCountSizes = JSON.parse('{{ south_south_region_device_count_sizes_json|escapejs }}');
+        var lagosRegionDeviceCountLabels = JSON.parse('{{ lagos_region_device_count_labels_json|escapejs }}');
+        var lagosRegionDeviceCountSizes = JSON.parse('{{ lagos_region_device_count_sizes_json|escapejs }}');
+        var westRegionDeviceCountLabels = JSON.parse('{{ west_region_device_count_labels_json|escapejs }}');
+        var westRegionDeviceCountSizes = JSON.parse('{{ west_region_device_count_sizes_json|escapejs }}');
+
+        // Function to update a pie chart
+        function updateChart(canvasId, labels, sizes) {
+            console.log("Updating Chart:", canvasId, labels, sizes);
+            var ctx = document.getElementById(canvasId);
+            if (!ctx) {
+                console.error('Canvas element not found:', canvasId);
+                return;
+            }
+
+            ctx = ctx.getContext('2d');
+            if (!ctx) {
+                console.error('Failed to get 2D context for canvas:', canvasId);
+                return;
+            }
+
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: sizes,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.8)',
+                            'rgba(54, 162, 235, 0.8)',
+                            'rgba(255, 206, 86, 0.8)',
+                            'rgba(75, 192, 192, 0.8)',
+                            'rgba(255, 159, 64, 0.8)',
+                            'rgba(255, 99, 71, 0.8)',
+                            'rgba(0, 128, 0, 0.8)'
+                        ],
+                    }]
+                },
+                options: {
+                    responsive: false, // Disable responsiveness
+                    maintainAspectRatio: false,
+                }
+            });
+        }
+
+        // Initial chart setup
+        updateChart('regionPieChart', regionLabels, regionSizes);
+        updateChart('deviceTypePieChart', deviceLabels, deviceSizes);
+        updateChart('oneRegionDeviceCountChart', oneRegionDeviceCountLabels, oneRegionDeviceCountSizes);
+        updateChart('northWestRegionDeviceCountChart', northWestRegionDeviceCountLabels, northWestRegionDeviceCountSizes);
+        updateChart('southEastRegionDeviceCountChart', southEastRegionDeviceCountLabels, southEastRegionDeviceCountSizes);
+        updateChart('southSouthRegionDeviceCountChart', southSouthRegionDeviceCountLabels, southSouthRegionDeviceCountSizes);
+        updateChart('lagosRegionDeviceCountChart', lagosRegionDeviceCountLabels, lagosRegionDeviceCountSizes);
+        updateChart('westRegionDeviceCountChart', westRegionDeviceCountLabels, westRegionDeviceCountSizes);
+    });
+</script>
+<div class="mb-3">
+    <a href="{% url 'export_pie_data' %}" class="btn btn-primary">Eport Pie Data</a>
+    <a href="{% url 'home' %}" class="btn btn-primary">Back</a>
+  </div>
+</body>
+</html>

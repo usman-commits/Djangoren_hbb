@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Region and State Tabs</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            margin: 20px 0;
+        }
+
+        .tabs-container {
+            display: flex;
+            flex-direction: column;
+            margin-right: 20px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .tab-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .state-tabs {
+            display: none;
+        }
+
+        .state-tab-btn {
+            padding: 10px;
+            background-color: #3498db;
+            color: #fff;
+            margin-bottom: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .state-tab-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .state-table {
+            padding: 20px;
+            width: 100%;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: red;
+            color: #fff;
+        }
+    </style>
+    <script>
+        function hideAllTabsAndTables() {
+            var stateTabs = document.querySelectorAll('.state-tabs');
+            stateTabs.forEach(function(tab) {
+                tab.style.display = 'none';
+            });
+
+            var stateTables = document.querySelectorAll('.state-table');
+            stateTables.forEach(function(table) {
+                table.style.display = 'none';
+            });
+        }
+
+        function showStateTabs(region) {
+            hideAllTabsAndTables();
+
+            document.getElementById(region + 'Tabs').style.display = 'block';
+            document.getElementById(region + 'Table').style.display = 'block';
+            // Populate the default state table when region tab is clicked
+            populateDefaultStateTable(region);
+        }
+
+        function showStateTable(state) {
+            hideAllTabsAndTables();
+
+            document.getElementById(state + 'Table').style.display = 'block';
+            // Populate the clicked state table when state tab is clicked
+            populateStateTable(state);
+        }
+
+        // Hide all tabs and tables initially
+        window.onload = hideAllTabsAndTables;
+
+        function populateDefaultStateTable(region) {
+    console.log("Populating default state table for region:", region);
+    fetch('/populate_default_table/' + region.toLowerCase())
+        .then(response => response.json())
+        .then(data => {
+            updateTableContent(data, region);
+        })
+        .catch(error => console.error('Error fetching data:', error));
+}
+
+function populateStateTable(state) {
+    console.log("Populating state table for state:", state);
+    fetch('/populate_table/' + state.toLowerCase())
+        .then(response => response.json())
+        .then(data => {
+            updateTableContent(data, state);
+        })
+        .catch(error => console.error('Error fetching data:', error));
+}
+
+function updateTableContent(data, regionOrState) {
+            console.log(`Updating table content for ${regionOrState}`, data);
+            var tableBody = document.getElementById(regionOrState + 'Table').querySelector('tbody');
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) {
+                // Handle the case when no data is found
+                var row = document.createElement('tr');
+                var cell = document.createElement('td');
+                cell.textContent = 'No data available';
+                row.appendChild(cell);
+                tableBody.appendChild(row);
+            } else {
+                // Update the table content using the fetched data
+                data.forEach(function(rowData) {
+                    var row = document.createElement('tr');
+
+                    // Create and append table cells for each column
+                    for (var key in rowData) {
+                        var cell = document.createElement('td');
+                        cell.textContent = rowData[key];
+                        row.appendChild(cell);
+                    }
+
+                    // Append the row to the table body
+                    tableBody.appendChild(row);
+                });
+            }
+        }
+
+    </script>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Region Tabs -->
+        <div class="tabs-container">
+            {% for region, _ in Broadband.REGION_CHOICES %}
+                <button class="tab-btn" onclick="showStateTabs('{{ region|lower }}')">{{ region }}</button>
+            {% endfor %}
+        </div>
+    
+        {% for region, states in Broadband.STATE_CHOICES.items %}
+        <div id="{{ region|lower }}Tabs" class="state-tabs">
+            <h2>{{ region }} States</h2>
+            {% for state, _ in states %}
+                <div class="state-tab-btn" onclick="showStateTable('{{ state|lower }}')">{{ state }}</div>
+            {% endfor %}
+        </div>
+    
+        <div id="{{ region|lower }}Table" class="state-table">
+            <h2>{{ region }} State Table</h2>
+            <p>Select a state to view MTD.</p>
+        </div>
+    
+        {% for state, _ in states %}
+            <div id="{{ state|lower }}Table" class="state-table">
+                <h2>{{ state }} Table</h2>
+                <table>
+                    <thead>
+                        <tr>
+                        <th>SN</th>
+                        <th>NAME</th>
+                        <th>STATE</th>
+                        <th>MIFI</th>
+                        <th>ROUTER</th>
+                        <th>ODU</th>
+                        <th>5G ROUTER</th>
+                        <th>TOTAL</th>
+                        <th>TARGET</th>
+                        <th>ACHIEVED (%)</th>
+                        <th>LMTD</th>
+                        <th>GROWTH (%)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for data in state_data %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ data.name }}</td>
+                            <td>{{ data.state }}</td>
+                            <td>{{ data.MIFI }}</td>
+                            <td>{{ data.Router }}</td>
+                            <td>{{ data.ODU }}</td>
+                            <td>{{ data.d5G_Router }}</td>
+                            <td>{{ data.total_devices }}</td>
+                            <td>{{ data.total_percentage_achieved }}%</td>
+                            <td>{{ data.achieved_previous_month }}%</td>
+                            <td>{{ data.growth_percentage }}%</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endfor %}
+{% endfor %}
+</div>
+
+<script>
+    function hideAllTabsAndTables() {
+        var stateTabs = document.querySelectorAll('.state-tabs');
+        stateTabs.forEach(function(tab) {
+            tab.style.display = 'none';
+        });
+
+        var stateTables = document.querySelectorAll('.state-table');
+        stateTables.forEach(function(table) {
+            table.style.display = 'none';
+        });
+    }
+
+    function showStateTabs(region) {
+        hideAllTabsAndTables();
+
+        document.getElementById(region + 'Tabs').style.display = 'block';
+        document.getElementById(region + 'Table').style.display = 'block';
+        // Populate the default state table when region tab is clicked
+        populateDefaultStateTable(region);
+    }
+
+    function showStateTable(state) {
+    hideAllTabsAndTables();
+    document.getElementById(state + 'Table').style.display = 'block';
+    // Populate the clicked state table when state tab is clicked
+    populateStateTable(state);
+}
+
+
+    // Hide all tabs and tables initially
+    window.onload = hideAllTabsAndTables;
+
+    function populateDefaultStateTable(region) {
+    console.log("Populating default state table for region:", region);
+     fetch('/populate-default-table/' + region.toLowerCase())
+         .then(response => response.json())
+         .then(data => {
+             // Update the table content using the fetched data
+             updateTableContent(data, region);
+         })
+         
+         .catch(error => console.error('Error fetching data:', error));
+        
+ }
+
+ function populateStateTable(state) {
+    console.log("Populating state table for state:", state);
+     fetch('/populate-table/' + state.toLowerCase())
+         .then(response => response.json())
+         .then(data => {
+             // Update the table content using the fetched data
+             updateTableContent(data, State);
+         })
+         .catch(error => console.error('Error fetching data:', error));
+ }
+ populateDefaultStateTable('{{ Broadband.REGION_CHOICES.0.0|lower }}');  // Assuming 'North East' is the first region choice
+</script>
+
+
+</body>
+</html>

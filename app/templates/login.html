@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Login{% endblock title %}
+
+{% block main-content %}
+    <div class="container">
+        <form method="post" class="login-form">
+            {% csrf_token %}
+            <h2>Login</h2>
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <!-- Display form errors -->
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    Incorrect username or password:
+                </div>
+            {% endif %}
+
+            <div class="shadow p-4 mb-5 bg-body rounded">
+                <label for="id_username">Username:</label>
+                <input type="text" class="form-control" name="username" required>
+                {% if form.errors.username %}
+                    <div class="alert alert-danger">
+                        {{ form.errors.username.0 }}
+                    </div>
+                {% endif %}
+                <br>
+                <label for="id_password">Password:</label>
+                <input type="password" class="form-control" name="password" required>
+                {% if form.errors.password %}
+                    <div class="alert alert-danger">
+                        {{ form.errors.password.0 }}
+                    </div>
+                {% endif %}
+                <br>
+                <button type="submit" class="btn btn-primary">Login</button>
+                <br>
+                <p>Forgot Password? <a href="{% url 'password_reset' %}">Click here</a></p>
+                <p>Admin Page:<a href="{% url 'admin:index' %}">Admin</a></p>
+            </div>
+        </form>
+    </div>
+{% endblock main-content %}
+

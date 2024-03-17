@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Broadband Data</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Include jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Custom CSS -->
+    <style>
+        .red-header th {
+            background-color: red !important;
+            color: white;
+        }
+
+        table.gridlines {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        table.gridlines th,
+        table.gridlines td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        table.gridlines th {
+            text-align: left;
+        }
+
+        table.gridlines tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        table.gridlines tr:hover {
+            background-color: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4">
+                <h2>Select Region:</h2>
+                <div id="region-buttons">
+                    <!-- Region buttons will be populated dynamically -->
+                </div>
+            </div>
+            <div class="col-md-4">
+                <h2>Select State:</h2>
+                <select id="state-dropdown" class="form-select">
+                    <!-- States dropdown will be populated dynamically -->
+                </select>
+            </div>
+        </div>
+        <div class="col-md-12 mt-3">
+            <h2 id="current-month-year"></h2> <!-- Display current month and year -->
+            <div>
+                <!-- Navigation buttons for switching between months -->
+                <button id="prevMonthBtn" class="btn btn-primary">Previous Month</button>
+                <button id="nextMonthBtn" class="btn btn-primary">Next Month</button>
+                <!-- Hidden input fields to store the current month, year, and day -->
+                <input type="hidden" id="current-month" value="1"> <!-- Assuming January is the initial month -->
+                <input type="hidden" id="current-year" value="2024"> <!-- Assuming the initial year -->
+                <input type="hidden" id="current-day" value="1"> <!-- Assuming the initial day -->
+                <!-- Navigation buttons for switching between days -->
+                <button id="prevDayBtn" class="btn btn-primary">Previous Day</button>
+                <button id="nextDayBtn" class="btn btn-primary">Next Day</button>
+            </div>
+        </div>
+        <div class="col-md-12 mt-5">
+            <div id="table-data">
+                <!-- Table data will be populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript code -->
+    <script>
+        $(document).ready(function() {
+            // Function to populate region buttons
+            function populateRegionButtons() {
+                var regions = ['North East', 'North West', 'South East', 'South South', 'Lagos', 'West'];
+                var buttonsHtml = '';
+                regions.forEach(function(region) {
+                    buttonsHtml += '<button class="btn btn-primary region-button" data-region="' + region + '">' + region + '</button>';
+                });
+                $('#region-buttons').html(buttonsHtml);
+            }
+
+            // Function to populate states dropdown based on selected region
+            function populateStatesDropdown(region) {
+                $.ajax({
+                    url: '/get_states/',
+                    data: {
+                        'region': region
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        var states = data.states;
+                        var optionsHtml = '<option value="">Select State</option>';
+                        states.forEach(function(state) {
+                            optionsHtml += '<option value="' + state[0] + '">' + state[1] + '</option>';
+                        });
+                        $('#state-dropdown').html(optionsHtml);
+                    }
+                });
+            }
+
+            // Function to populate table data for all states in a region
+            function populateAllStatesData(region) {
+                $.ajax({
+                    url: '/get_all_states_in_region/',
+                    data: {
+                        'region': region
+                    },
+                    dataType: 'json',
+                    success: function(data) {
+                        var tableData = data.table_data;
+                        var tableHtml = '<table class="table gridlines"><thead><tr class="red-header"><th>SN</th><th class="sortable" data-column="HSE_name">HSE NAME</th><th class="sortable" data-column="State">STATE</th><th class="sortable" data-column="MIFI">MIFI</th><th class="sortable" data-column="Router">ROUTER</th><th class="sortable" data-column="ODU">ODU</th><th class="sortable" data-column="d5G_Router">5G ROUTER</th><th class="sortable" data-column="total">TOTAL</th><th>TARGET</th><th>ACHIEVED %</th><th class="sortable" data-column="lmtd">LMTD</th><th class="sortable" data-column="lmtd-growth">GROWTH %</th></tr></thead><tbody>';
+
+                        // Keep track of LMTD for each user
+                        var lmtdMap = {};
+
+                        tableData.forEach(function(item, index) {
+                            var achievedPercentage = (item.total / 50) * 100; // Calculate achieved percentage
+                            tableHtml += '<tr>';
+                            tableHtml += '<td>' + (index + 1) + '</td>';
+                            tableHtml += '<td>' + item.HSE_name + '</td>';
+                            tableHtml += '<td>' + item.State + '</td>';
+                            tableHtml += '<td>' + item.MIFI + '</td>';
+                            tableHtml += '<td>' + item.Router + '</td>';
+                            tableHtml += '<td>' + item.ODU + '</td>';
+                            tableHtml += '<td>' + item.d5G_Router + '</td>';
+                            tableHtml += '<td>' + item.total + '</td>';
+                            tableHtml += '<td>50</td>'; // Constant value for target
+                            tableHtml += '<td>' + achievedPercentage.toFixed() + '%</td>'; // Display achieved percentage with two decimal places
+
+                            // Calculate and update LMTD
+                            var lmtd = lmtdMap[item.HSE_name] || 0;
+                            lmtdMap[item.HSE_name] = lmtd + item.total; // Update LMTD
+                            tableHtml += '<td class="lmtd">' + lmtd + '</td>'; // Display LMTD
+
+                            // Calculate and update LMTD growth
+                            var growth = calculateLMTDGrowth(item.HSE_name, lmtdMap);
+                            tableHtml += '<td class="lmtd-growth">' + growth.toFixed() + '%</td>'; // Display LMTD growth
+
+                            // Add other fields here as needed
+                            tableHtml += '</tr>';
+                        });
+                        tableHtml += '</tbody></table>';
+                        $('#table-data').html(tableHtml);
+                    }
+                });
+            }
+
+            // Event listener for region buttons
+            $(document).on('click', '.region-button', function() {
+                var region = $(this).data('region');
+                populateStatesDropdown(region);
+                populateAllStatesData(region); // Populate data for all states in the region
+            });
+
+            // Function to populate table data based on selected state, month, year, and day
+            function populateTableData(state, month, year, day) {
+                // Function logic remains the same as before
+                // Implement as needed based on your requirements
+            }
+
+            // Other functions and event listeners remain unchanged
+
+            // Populate region buttons on page load
+            populateRegionButtons();
+        });
+    </script>
+</body>
+</html>
