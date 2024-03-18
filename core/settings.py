@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-n0of)871%9=59ew0d+cho3@bagvek4*eak%j-+al#!#vv#-!y3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1','localhost','djangoren-hbb.onrender.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', "djangoren-hbb.onrender.com"]
 
 
 # Application definition
