@@ -195,7 +195,8 @@ class PhotoUploadView(View):
         if form.is_valid():
             user_profile, created = UserProfile.objects.get_or_create(user=request.user)
             uploaded_photo = request.FILES.get('uploaded_photo')
-            user_profile.uploaded_photos.create(uploaded_photo=uploaded_photo)
+            photo_caption = form.cleaned_data.get('photo_caption')  # Assuming 'photo_caption' is the name of the caption field in your form
+            new_photo = user_profile.uploaded_photos.create(uploaded_photo=uploaded_photo, photo_caption=photo_caption)
             messages.success(request, "Photo uploaded successfully.")
             return HttpResponseRedirect(reverse('upload_photo'))
         return render(request, self.template_name, {'form': form})

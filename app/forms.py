@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, UsernameField, PasswordChangeForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.models import User
-from .models import Broadband, ReactivationReport, NccOutLet, UserProfile
+from .models import Broadband, ReactivationReport, NccOutLet, UserProfile, UploadPhoto
 
 
 
@@ -90,9 +90,12 @@ class ProfilePictureForm(forms.ModelForm):
         fields = ['avatar']
 
 class UploadPhotoForm(forms.ModelForm):
+    photo_caption = forms.CharField(max_length=100, required=False)
     class Meta:
-        model = UserProfile
-        fields = ['uploaded_photo']
+        model = UploadPhoto
+        fields = ['uploaded_photo', 'photo_caption']
+
+
 
 
 class ReactivationReport(forms.ModelForm):

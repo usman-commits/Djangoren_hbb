@@ -51,8 +51,9 @@ class BroadbandModelAdmin(ImportExportModelAdmin,admin.ModelAdmin):
 
 
 
-admin.register(UploadPhoto)
-      
+@admin.register(UploadPhoto)
+class UploadphotoAdmin(admin.ModelAdmin):
+    list_display = ['user_profile', 'uploaded_photo', 'photo_caption']
 
 
 

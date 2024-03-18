@@ -139,6 +139,10 @@ class UserProfile(models.Model):
 class UploadPhoto(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='uploaded_photos')
     uploaded_photo = models.ImageField(upload_to='photos/')
+    photo_caption = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return f'Photo uploaded by {self.user_profile.user.username}'
 
 
 
