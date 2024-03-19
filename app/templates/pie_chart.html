@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+{% load static %}
+
 <html lang="en">
 <head>
     <!-- Include Chart.js library -->
@@ -6,9 +8,6 @@
 
     <!-- Add style to adjust layout -->
     <style>
-        
-
-
         body {
             display: flex;
             flex-direction: row;
@@ -35,39 +34,21 @@
             flex-basis: 33.33%; /* Set to one-third of the available space */
         }
 
-
-        .grand-total {
-        font-weight: bold;
-    }
-
-    body {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: flex-start;
-        justify-content: center;
-    }
-
-    h1, canvas {
-        margin: 10px;
-    }
-
-    canvas {
-        display: block;
-    }
-
-    .chart-container {
-        text-align: center;
-        flex-basis: 50%; /* Set to half of the available space */
-    }
-
-    .small-chart-container {
-        text-align: center;
-        flex-basis: 33.33%; /* Set to one-third of the available space */
-    }
+        #progressIndicator {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px; /* Adjust height as needed */
+            background-color: #007bff; /* Change color as needed */
+            z-index: 9999;
+        }
     </style>
 </head>
 <body>
+
+<div id="progressIndicator"></div>
 
 <div class="chart-container">
     <h1>Overall Region Sales Distribution</h1>
@@ -179,9 +160,70 @@
         updateChart('westRegionDeviceCountChart', westRegionDeviceCountLabels, westRegionDeviceCountSizes);
     });
 </script>
+
 <div class="mb-3">
-    <a href="{% url 'export_pie_data' %}" class="btn btn-primary">Eport Pie Data</a>
+    <a href="{% url 'export_pie_data' %}" class="btn btn-primary">Export Pie Data</a>
     <a href="{% url 'home' %}" class="btn btn-primary">Back</a>
-  </div>
+</div>
+
+<!-- Install button -->
+<button id="installButton" style="display: none;">Install App</button>
+
+<!-- Other scripts -->
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://storage.googleapis.com/workbox-cdn/releases/7.1.2/workbox-sw.js"></script>
+
+<!-- Install logic script -->
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('{% static "service-worker.js" %}')
+            .then(function(registration) {
+                console.log('Service Worker registered with scope:', registration.scope);
+            }).catch(function(error) {
+                console.log('Service Worker registration failed:', error);
+            });
+    }
+
+    let deferredPrompt;
+    const installButton = document.getElementById('installButton');
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        showInstallButton(); // Show the install button when beforeinstallprompt event is fired
+    });
+    
+    function showInstallButton() {
+        installButton.style.display = 'block'; // Display the install button
+    }
+
+    installButton.addEventListener('click', (e) => {
+        installButton.style.display = 'none'; // Hide the install button
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+            } else {
+                console.log('User dismissed the install prompt');
+            }
+            deferredPrompt = null;
+        });
+    });
+
+    window.addEventListener('appinstalled', (evt) => {
+        console.log('App installed successfully');
+    });
+
+    // Function to show the progress indicator
+    function showProgressIndicator() {
+        document.getElementById("progressIndicator").style.display = "block";
+    }
+
+    // Function to hide the progress indicator
+    function hideProgressIndicator() {
+        document.getElementById("progressIndicator").style.display = "none";
+    }
+</script>
+
 </body>
 </html>

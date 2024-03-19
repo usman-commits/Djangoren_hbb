@@ -22,10 +22,25 @@
         .navbar.navbar-dark.bg-dark {
             border-bottom: 5px solid rgb(241, 7, 7); 
         }
+
+        /* Styles for the progress indicator */
+        #progressIndicator {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px; /* Adjust height as needed */
+            background-color: #007bff; /* Change color as needed */
+            z-index: 9999;
+        }
     </style>
 </head>
 
 <body>
+    <!-- Progress Indicator -->
+    <div id="progressIndicator"></div>
+
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
             <div class="container">
@@ -159,6 +174,16 @@
         window.addEventListener('appinstalled', (evt) => {
             console.log('App installed successfully');
         });
+
+        // Function to show the progress indicator
+        function showProgressIndicator() {
+            document.getElementById("progressIndicator").style.display = "block";
+        }
+
+        // Function to hide the progress indicator
+        function hideProgressIndicator() {
+            document.getElementById("progressIndicator").style.display = "none";
+        }
     </script>
    
 </body>

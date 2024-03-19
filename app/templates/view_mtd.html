@@ -10,8 +10,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
-
 
     <!-- Custom CSS -->
     <style>
@@ -124,6 +122,10 @@
                         'day': day
                     },
                     dataType: 'json',
+                    beforeSend: function() {
+                        // Show loading spinner before making the AJAX request
+                        $('.loading-spinner').show();
+                    },
                     success: function(data) {
                         var tableData = data.table_data;
                         var tableHtml = '<table class="table gridlines"><thead><tr class="red-header"><th>SN</th><th class="sortable" data-column="HSE_name">HSE Name</th><th class="sortable" data-column="State">STATE</th><th class="sortable" data-column="MIFI">MIFI</th><th class="sortable" data-column="Router">ROUTER</th><th class="sortable" data-column="ODU">ODU</th><th class="sortable" data-column="d5G_Router">5G ROUTER</th><th class="sortable" data-column="total">TOTAL</th><th>TARGET</th><th>ACHIEVED %</th><th class="sortable" data-column="lmtd">LMTD</th><th class="sortable" data-column="lmtd-growth">GROWTH %</th></tr></thead><tbody>';
@@ -187,6 +189,10 @@
                         tableHtml += '</tbody></table>';
                         $('#table-data').html(tableHtml);
                         $('#current-month-year').text(data.corresponding_date); // Update current month and year display
+                    },
+                    complete: function() {
+                        // Hide loading spinner after AJAX request is complete
+                        $('.loading-spinner').hide();
                     }
                 });
             }
@@ -327,19 +333,19 @@
         });
 
         // Function to export table data to Excel
-function exportToExcel() {
-    var table = document.getElementById('table-data');
-    var wb = XLSX.utils.table_to_book(table, {sheet:"Sheet1"});
-    XLSX.writeFile(wb, 'table_data.xlsx');
-}
+        function exportToExcel() {
+            var table = document.getElementById('table-data');
+            var wb = XLSX.utils.table_to_book(table, {sheet:"Sheet1"});
+            XLSX.writeFile(wb, 'table_data.xlsx');
+        }
 
-// Event listener for export button click
-$('#exportToExcelBtn').click(function() {
-    exportToExcel();
-});
+        // Event listener for export button click
+        $('#exportToExcelBtn').click(function() {
+            exportToExcel();
+        });
 
-// Function to export table data to image
-function exportToImage() {
+        // Function to export table data to image
+        function exportToImage() {
             var table = document.getElementById('table-data');
             html2canvas(table).then(function(canvas) {
                 var imgData = canvas.toDataURL('image/png');
@@ -351,13 +357,19 @@ function exportToImage() {
         }
 
         // Event listener for export button click
-        $(document).on('click', '#exportToImageBtn', function() {
+        $('#exportToImageBtn').click(function() {
             exportToImage();
         });
 
     </script>
     <div class="mb-3">
         <a href="{% url 'home' %}" class="btn btn-primary">Back</a>
-      </div>
+    </div>
+    <!-- Loading spinner -->
+    <div class="loading-spinner" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
 </body>
 </html>
