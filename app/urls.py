@@ -38,7 +38,7 @@ from .forms import(
 
 
 urlpatterns = [
-     path('', auth_views.LoginView.as_view(template_name='login.html', authentication_form=LoginForm, success_url='home/'), name='login'),
+    path('', auth_views.LoginView.as_view(template_name='login.html', authentication_form=LoginForm, success_url='/home/'), name='login'),
     path('home/',views.DeviceRegistrationView.as_view(), name='home'),
     path('reactivationreport/',views.ReactivationReportView.as_view(), name='reactivationreport'),
     path('nccoutlet/',views.NccOutLetView.as_view(), name='nccoutlet'),
@@ -82,4 +82,5 @@ urlpatterns = [
 
     path('password-reset-complete/', auth_view.PasswordResetCompleteView.as_view(template_name='password_reset_complete.html'), name='password_reset_complete'),
     path('logout/', logout_view, name='logout'),
+    
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
