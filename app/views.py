@@ -652,6 +652,9 @@ def get_all_states_table_data(request):
 
 
 
+
+
+
         
 
 

@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import MaxValueValidator,MinValueValidator
+from django.core.validators import MaxValueValidator,MinValueValidator, RegexValidator
 import datetime
 from import_export import resources 
 from django.db.models import JSONField
@@ -79,14 +79,28 @@ class Broadband(models.Model):
             ('Oyo', 'Oyo'),
         ],
         
-    }
+     }
     user = models.ForeignKey(User,on_delete=models.CASCADE, null=True)
     HSE_name = models.CharField(max_length=50)
-    MSISDN = models.IntegerField()
+    MSISDN = models.CharField(
+        max_length=11,
+        validators=[
+            RegexValidator(r'^[0-9]{11}$', 'MSISDN must be an 11-digit number.')
+        ]
+    )
     Customer_name = models.CharField(max_length=50)
-    IMEI = models.IntegerField(validators=[MaxValueValidator(999999999999999 ,message='IMEI can not be greater than 15 digits'), 
-    MinValueValidator(100000000000000, message='IMEI can not be less than 15 digits') ])
-    Alternate = models.IntegerField()
+    IMEI = models.CharField(
+        max_length=15,
+        validators=[
+            RegexValidator(r'^[0-9]{15}$', 'IMEI must be a 15-digit number.')
+        ]
+    )
+    Alternate = models.CharField(
+        max_length=11,
+        validators=[
+            RegexValidator(r'^[0-9]{11}$', 'Alternate number must be an 11-digit number.')
+        ]
+    )
     Device_type = models.CharField(choices=DEVICE_CHOICES, max_length=100)
     Post_date = models.DateTimeField(auto_now_add=True)
     Region = models.CharField(choices=REGION_CHOICES, max_length=100, default='North East')
@@ -97,7 +111,6 @@ class Broadband(models.Model):
     ODU = models.IntegerField(default=0)
     d5G_Router = models.IntegerField(default=0)
     achieved_previous_month = models.FloatField(default=0.0)
-
     
     @property
     def total_devices(self):
