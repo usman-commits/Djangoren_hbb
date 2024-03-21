@@ -93,17 +93,22 @@ class UploadPhotoForm(forms.ModelForm):
     photo_caption = forms.CharField(max_length=100, required=False)
     class Meta:
         model = UploadPhoto
-        fields = ['uploaded_photo', 'photo_caption']
-
+        fields = ['Region','State','uploaded_photo', 'photo_caption']
+        widgets = {
+            'Region': forms.Select(attrs={'autofocus': 'True', 'class': 'form-control'}),
+            'State': forms.Select(attrs={'autofocus': 'True', 'class': 'form-control'}),
+       }
 
 
 
 class ReactivationReport(forms.ModelForm):
     class Meta:
         model = ReactivationReport
-        fields = ['HSE_name','Total_calls','Successful_calls','Unsuccessful_calls','Successful_bundle']
+        fields = ['HSE_name','Region','State','Total_calls','Successful_calls','Unsuccessful_calls','Successful_bundle']
         widgets = {
             'HSE_name': forms.TextInput(attrs={'class':'form-control'}),
+            'Region': forms.Select(attrs={'autofocus': 'True', 'class': 'form-control'}),
+            'State': forms.Select(attrs={'autofocus': 'True', 'class': 'form-control'}),
             'Total_calls': forms.NumberInput(attrs={'autofocus':'True','class':'form-control'}),
             'Successful_calls': forms.NumberInput(attrs={'autofocus':'True','class':'form-control'}),
             'Unsuccessful_calls': forms.NumberInput(attrs={'autofocus':'True','class':'form-control'}),
@@ -114,9 +119,11 @@ class ReactivationReport(forms.ModelForm):
 class NccOutLet(forms.ModelForm):
     class Meta:
         model = NccOutLet
-        fields = ['HSE_name','Total_certified_outlet','Outlet_visited', 'Outlet_with_device', 'Total_devices_in_outlet','Total_devices_sold']
+        fields = ['HSE_name','Region','State','Total_certified_outlet','Outlet_visited', 'Outlet_with_device', 'Total_devices_in_outlet','Total_devices_sold']
         widgets = {
             'HSE_name': forms.TextInput(attrs={'class':'form-control'}),
+            'Region': forms.Select(attrs={'autofocus': 'True', 'class': 'form-control'}),
+            'State': forms.Select(attrs={'autofocus': 'True', 'class': 'form-control'}),
             'Total_certified_outlet': forms.NumberInput(attrs={'autofocus':'True','class':'form-control'}),
             'Outlet_visited': forms.NumberInput(attrs={'autofocus':'True','class':'form-control'}),
             'Outlet_with_device': forms.NumberInput(attrs={'autofocus':'True','class':'form-control'}),

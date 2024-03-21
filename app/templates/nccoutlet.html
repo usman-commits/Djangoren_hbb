@@ -37,6 +37,86 @@
                         {% endif %}
                         </div>
                     </form>
+
+                    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script>
+            function updateStates() {
+                var regionSelect = document.getElementById('id_Region');
+                var stateSelect = document.getElementById('id_State');
+                var region = regionSelect.value;
+        
+                var stateOptions = {
+                    'North East': [
+                        'Kano',
+                        'Jigawa',
+                        'Bauchi',
+                        'Yobe',
+                        'Borno',
+                        'Adamawa',
+                        'Taraba',
+                        'Gombe'
+                    ],
+                    'North West': [
+                        'Kaduna',
+                        'FCT',
+                        'Katsina',
+                        'Niger',
+                        'Plateau',
+                        'Kebbi',
+                        'Sokoto',
+                        'Zamfara',
+                        'Kogi',
+                        'Nasarawa'
+                    ],
+                    'South East': [
+                        'Enugu',
+                        'Imo',
+                        'Anambra',
+                        'Abia',
+                        'Benue',
+                        'Ebonyi'
+                    ],
+                    'South South': [
+                        'Bayelsa',
+                        'Delta',
+                        'Port Harcourt',
+                        'Akwa Ibom',
+                        'Cross River',
+                        'Edo'
+                    ],
+                    'Lagos': [
+                        'Lagos Boundary',
+                        'Lagos Island', 
+                        'Lagos Mainland'
+                    ],
+                    'West': [
+                        'Ekiti',
+                        'Ogun',
+                        'Ondo',
+                        'Osun',
+                        'Oyo',
+                        'Kwara',
+                    ]
+                    // Add more states as needed
+                };
+           
+        
+                // Clear existing options
+                stateSelect.innerHTML = '';
+        
+                // Populate state options based on the selected region
+                stateOptions[region].forEach(function (state) {
+                    var option = document.createElement('option');
+                    option.value = state; // Set both the value and display text to the state name
+                    option.text = state;
+                    stateSelect.appendChild(option);
+                });
+            }
+        
+            // Call the function when the page loads and whenever the region selection changes
+            window.onload = updateStates;
+            document.getElementById('id_Region').addEventListener('change', updateStates);
+        </script>
                 </div>
         
             </div>

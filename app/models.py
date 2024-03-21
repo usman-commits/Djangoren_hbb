@@ -101,7 +101,7 @@ class Broadband(models.Model):
             RegexValidator(r'^[0-9]{11}$', 'Alternate number must be an 11-digit number.')
         ]
     )
-    Device_type = models.CharField(choices=DEVICE_CHOICES, max_length=100)
+    Device_type = models.CharField(choices=DEVICE_CHOICES, max_length=100, default='MIFI')
     Post_date = models.DateTimeField(auto_now_add=True)
     Region = models.CharField(choices=REGION_CHOICES, max_length=100, default='North East')
     State = models.CharField(max_length=100)
@@ -150,9 +150,78 @@ class UserProfile(models.Model):
 
 
 class UploadPhoto(models.Model):
+    REGION_CHOICES = [
+        ('North East', 'North East'),
+        ('North West', 'North West'),
+        ('South East', 'South East'),
+        ('South South', 'South South'),
+        ('Lagos', 'Lagos'),
+        ('West', 'West'),
+    ]
+
+    STATE_CHOICES = {
+        'North East': [
+            ('Kano', 'Kano'),
+            ('Jigawa', 'Jigawa'),
+            ('Bauchi', 'Bauchi'),
+            ('Yobe', 'Yobe'),
+            ('Borno', 'Borno'),
+            ('Adamawa', 'Adamawa'),
+            ('Taraba', 'Taraba'),
+            ('Gombe', 'Gombe'),
+        ],
+        'North West': [
+            ('Kaduna', 'Kaduna'),
+            ('FCT', 'FCT'),
+            ('Katsina', 'Katsina'),
+            ('Niger', 'Niger'),
+            ('Plateau', 'Plateau'),
+            ('Kebbi', 'Kebbi'),
+            ('Sokoto', 'Sokoto'),
+            ('Zamfara', 'Zamfara'),
+            ('Kogi', 'Kogi'),
+            ('Nasarawa', 'Nasarawa'),
+        ],
+        'South East': [
+            ('Enugu', 'Enugu'),
+            ('Imo', 'Imo'),
+            ('Anambra', 'Anambra'),
+            ('Abia', 'Abia'),
+            ('Benue', 'Benue'),
+            ('Ebonyi', 'Ebonyi'),
+        ],
+        'South South': [
+            ('Bayelsa', 'Bayelsa'),
+            ('Delta', 'Delta'),
+            ('Rivers', 'Rivers'),
+            ('Akwa Ibom', 'Akwa Ibom'),
+            ('Cross River', 'Cross River'),
+            ('Edo', 'Edo'),
+        ],
+        'Lagos': [
+            ('Lagos Boundary', 'Lagos Boundary'),
+            ('Lagos Island', 'Lagos Island'),
+            ('Lagos Mainland', 'Lagos Mainland'),
+        ],
+        'West': [
+            ('Ogun', 'Ogun'),
+            ('Ekiti', 'Ekiti'),
+            ('Ondo', 'Ondo'),
+            ('Osun', 'Osun'),
+            ('Kwara', 'Kwara'),
+            ('Oyo', 'Oyo'),
+        ],
+        
+     }
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='uploaded_photos')
+    Region = models.CharField(choices=REGION_CHOICES, max_length=100, default='North East')
+    State = models.CharField(max_length=100, default='kano')
     uploaded_photo = models.ImageField(upload_to='photos/')
     photo_caption = models.CharField(max_length=100, blank=True, null=True)
+    Post_date = models.DateTimeField(auto_now_add=True)
+
+  
+    
 
     def __str__(self):
         return f'Photo uploaded by {self.user_profile.user.username}'
@@ -162,7 +231,72 @@ class UploadPhoto(models.Model):
 
 
 class ReactivationReport(models.Model):
+    REGION_CHOICES = [
+        ('North East', 'North East'),
+        ('North West', 'North West'),
+        ('South East', 'South East'),
+        ('South South', 'South South'),
+        ('Lagos', 'Lagos'),
+        ('West', 'West'),
+    ]
+
+    STATE_CHOICES = {
+        'North East': [
+            ('Kano', 'Kano'),
+            ('Jigawa', 'Jigawa'),
+            ('Bauchi', 'Bauchi'),
+            ('Yobe', 'Yobe'),
+            ('Borno', 'Borno'),
+            ('Adamawa', 'Adamawa'),
+            ('Taraba', 'Taraba'),
+            ('Gombe', 'Gombe'),
+        ],
+        'North West': [
+            ('Kaduna', 'Kaduna'),
+            ('FCT', 'FCT'),
+            ('Katsina', 'Katsina'),
+            ('Niger', 'Niger'),
+            ('Plateau', 'Plateau'),
+            ('Kebbi', 'Kebbi'),
+            ('Sokoto', 'Sokoto'),
+            ('Zamfara', 'Zamfara'),
+            ('Kogi', 'Kogi'),
+            ('Nasarawa', 'Nasarawa'),
+        ],
+        'South East': [
+            ('Enugu', 'Enugu'),
+            ('Imo', 'Imo'),
+            ('Anambra', 'Anambra'),
+            ('Abia', 'Abia'),
+            ('Benue', 'Benue'),
+            ('Ebonyi', 'Ebonyi'),
+        ],
+        'South South': [
+            ('Bayelsa', 'Bayelsa'),
+            ('Delta', 'Delta'),
+            ('Rivers', 'Rivers'),
+            ('Akwa Ibom', 'Akwa Ibom'),
+            ('Cross River', 'Cross River'),
+            ('Edo', 'Edo'),
+        ],
+        'Lagos': [
+            ('Lagos Boundary', 'Lagos Boundary'),
+            ('Lagos Island', 'Lagos Island'),
+            ('Lagos Mainland', 'Lagos Mainland'),
+        ],
+        'West': [
+            ('Ogun', 'Ogun'),
+            ('Ekiti', 'Ekiti'),
+            ('Ondo', 'Ondo'),
+            ('Osun', 'Osun'),
+            ('Kwara', 'Kwara'),
+            ('Oyo', 'Oyo'),
+        ],
+        
+     }
     HSE_name = models.CharField(max_length=50)
+    Region = models.CharField(choices=REGION_CHOICES, max_length=100, default='North East')
+    State = models.CharField(max_length=100, default='kano')
     Total_calls = models.IntegerField()
     Successful_calls = models.IntegerField()
     Unsuccessful_calls = models.IntegerField()
@@ -172,8 +306,74 @@ class ReactivationReport(models.Model):
         return self.HSE_name
 
 
+
 class NccOutLet(models.Model):
+    REGION_CHOICES = [
+        ('North East', 'North East'),
+        ('North West', 'North West'),
+        ('South East', 'South East'),
+        ('South South', 'South South'),
+        ('Lagos', 'Lagos'),
+        ('West', 'West'),
+    ]
+
+    STATE_CHOICES = {
+        'North East': [
+            ('Kano', 'Kano'),
+            ('Jigawa', 'Jigawa'),
+            ('Bauchi', 'Bauchi'),
+            ('Yobe', 'Yobe'),
+            ('Borno', 'Borno'),
+            ('Adamawa', 'Adamawa'),
+            ('Taraba', 'Taraba'),
+            ('Gombe', 'Gombe'),
+        ],
+        'North West': [
+            ('Kaduna', 'Kaduna'),
+            ('FCT', 'FCT'),
+            ('Katsina', 'Katsina'),
+            ('Niger', 'Niger'),
+            ('Plateau', 'Plateau'),
+            ('Kebbi', 'Kebbi'),
+            ('Sokoto', 'Sokoto'),
+            ('Zamfara', 'Zamfara'),
+            ('Kogi', 'Kogi'),
+            ('Nasarawa', 'Nasarawa'),
+        ],
+        'South East': [
+            ('Enugu', 'Enugu'),
+            ('Imo', 'Imo'),
+            ('Anambra', 'Anambra'),
+            ('Abia', 'Abia'),
+            ('Benue', 'Benue'),
+            ('Ebonyi', 'Ebonyi'),
+        ],
+        'South South': [
+            ('Bayelsa', 'Bayelsa'),
+            ('Delta', 'Delta'),
+            ('Rivers', 'Rivers'),
+            ('Akwa Ibom', 'Akwa Ibom'),
+            ('Cross River', 'Cross River'),
+            ('Edo', 'Edo'),
+        ],
+        'Lagos': [
+            ('Lagos Boundary', 'Lagos Boundary'),
+            ('Lagos Island', 'Lagos Island'),
+            ('Lagos Mainland', 'Lagos Mainland'),
+        ],
+        'West': [
+            ('Ogun', 'Ogun'),
+            ('Ekiti', 'Ekiti'),
+            ('Ondo', 'Ondo'),
+            ('Osun', 'Osun'),
+            ('Kwara', 'Kwara'),
+            ('Oyo', 'Oyo'),
+        ],
+        
+     }
     HSE_name = models.CharField(max_length=50)
+    Region = models.CharField(choices=REGION_CHOICES, max_length=100, default='North East')
+    State = models.CharField(max_length=100, default='kano')
     Total_certified_outlet = models.IntegerField()
     Outlet_visited = models.IntegerField()
     Outlet_with_device = models.IntegerField()
